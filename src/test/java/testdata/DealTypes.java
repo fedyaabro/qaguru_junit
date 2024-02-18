@@ -1,4 +1,4 @@
-package testData;
+package testdata;
 
 public enum DealTypes {
   BUY("Купить"),

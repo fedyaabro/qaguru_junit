@@ -1,4 +1,4 @@
-package testData;
+package testdata;
 
 public enum Location {
   SPb("/sankt-peterburg/", "Санкт-Петербург"),

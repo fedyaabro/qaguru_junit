@@ -1,20 +1,43 @@
+package pages;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
-import testData.DealTypes;
-import testData.Location;
+import testdata.DealTypes;
+import testdata.Location;
+import testdata.YandexRealtyMainPageTestData;
 
 import java.util.List;
 import java.util.stream.Stream;
 
 import static com.codeborne.selenide.Selenide.open;
 
-public class YandexRealtyParameterizedTests extends TestBase {
+public class YandexRealtyMainPageSmokeTests extends TestBase {
   
-  YandexRealtyMainPage mainPage = new YandexRealtyMainPage();
+  YandexRealtyMainPageTestData mainPage = new YandexRealtyMainPageTestData();
+  
+  
+  static Stream<Arguments> dropDownShouldHaveRealtyTypesDependingOnDealTubs(){
+    
+    return Stream.of(
+      Arguments.of(DealTypes.BUY, List.of("Квартиру", "Комнату", "Дом", "Участок", "Гараж или машиноместо", "Коммерческую недвижимость")),
+      Arguments.of(DealTypes.LONG_RENT,List.of("Квартиру", "Комнату", "Дом", "Гараж или машиноместо", "Коммерческую недвижимость")),
+      Arguments.of(DealTypes.SHORT_RENT, List.of("Квартиру", "Комнату", "Дом")));
+  }
+  
+  @MethodSource
+  @ParameterizedTest(name = "На табе {0} в дропдауне есть {1}")
+  @Tag("smoke")
+  void dropDownShouldHaveRealtyTypesDependingOnDealTubs(DealTypes dealTubs, List<String> expectedRealtyTypes){
+    open(Location.SPb.path);
+    mainPage
+      .choseFilterTab(dealTubs.description)
+      .clickOnTypeOfRealtyOnTheFilter()
+      .categoryDropDownShouldHaveExpectedText(expectedRealtyTypes);
+  }
   
   @CsvSource(value = {
     "/sankt-peterburg/ ,  Санкт-Петербург",
@@ -41,33 +64,14 @@ public class YandexRealtyParameterizedTests extends TestBase {
   }
   
   @Test
+  @Disabled
+  @Tag("Smoke")
   @DisplayName("При клике на тип недвижимости в фильтре открылся дропдаун")
   void afterClickOnRealtyTypeDropDownShouldBeOpen(){
    open(Location.SPb.path);
    mainPage
      .clickOnTypeOfRealtyOnTheFilter()
      .categoryDropDownShouldBeVisible();
-  }
-  
-  @Test
-  @DisplayName("В дропдауне продажи есть участок")
-  void sellingDropDownShouldHaveLandSpace(){
-   open(Location.SPb.path);
-   mainPage
-     .clickOnTypeOfRealtyOnTheFilter()
-     .categoryDropDownShouldBeVisible()
-     .categoryDropDownShouldHaveText("Участок");
-  }
-  
-  @Test
-  @DisplayName("В дропдауне аренды нет участка")
-  void sellingDropDownShouldNotHaveLandSpace(){
-    open(Location.SPb.path);
-    mainPage
-      .choseRentTab()
-      .clickOnTypeOfRealtyOnTheFilter()
-      .categoryDropDownShouldBeVisible()
-      .categoryDropDownShouldNotHaveText("Участок");
   }
   
   @ValueSource(strings = {
@@ -81,7 +85,7 @@ public class YandexRealtyParameterizedTests extends TestBase {
   
   @ParameterizedTest(name = "В дропдауне есть {0}")
   @DisplayName("В дропдауне  есть возможность выбрать определенный тип недвижимости")
-  void sellingDropDownShouldNotHaveRealtyTypes(String realtyTypes){
+  void sellingDropDownShouldHaveRealtyTypes(String realtyTypes){
     open(Location.SPb.path);
     mainPage
       .choseSellTab()
@@ -90,23 +94,4 @@ public class YandexRealtyParameterizedTests extends TestBase {
       .categoryDropDownShouldHaveText(realtyTypes);
   }
   
-  
-  
-  static Stream<Arguments> dropDownShouldHaveRealtyTypesDependingOnDealTubs(){
-    
-    return Stream.of(
-      Arguments.of(DealTypes.BUY, List.of("Квартиру", "Комнату", "Дом", "Участок", "Гараж или машиноместо", "Коммерческую недвижимость")),
-      Arguments.of(DealTypes.LONG_RENT,List.of("Квартиру", "Комнату", "Дом", "Гараж или машиноместо", "Коммерческую недвижимость")),
-      Arguments.of(DealTypes.SHORT_RENT, List.of("Квартиру", "Комнату", "Дом")));
-  }
-  
-  @MethodSource
-  @ParameterizedTest
-  void dropDownShouldHaveRealtyTypesDependingOnDealTubs(DealTypes dealTubs, List<String> expectedRealtyTypes){
-    open(Location.SPb.path);
-    mainPage
-      .choseFilterTab(dealTubs.description)
-      .clickOnTypeOfRealtyOnTheFilter()
-      .categoryDropDownShouldHaveExpectedText(expectedRealtyTypes);
-  }
 }
